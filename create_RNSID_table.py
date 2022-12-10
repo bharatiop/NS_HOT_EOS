@@ -41,7 +41,7 @@ baryon_mass_density = 10**data['logrho']   # gr / cm^3
 # Baryon number density
 baryon_number_density =  baryon_mass_density / baryonic_mass / MeVc2_to_grams  # 1 / cm^3
 
-# Find indexes of electroinc fractions that minimize energy at every density
+# Find indexes of electronic fractions that minimize energy at every density
 ye_0_idx = np.argmin(data['logenergy'][:, 0, :], axis = 0)
 entry = np.array(range(0, len(ye_0_idx)))
 
