@@ -52,7 +52,7 @@ pressure = 10**data['logpress'][ye_0_idx, 0, entry]   # dyn / cm^2
 # Find speed of sound squared
 cs2 = data['cs2'][ye_0_idx, 0, entry]
 # Find energy density
-energy_density = baryon_mass_density * (1 + eps/clite**2)
+energy_density = baryon_mass_density * (1 + eps/clite**2)    # gr / cm^3
 # Find log-enthalpy
 logh              = cs2 * np.log((energy_density + pressure/clite**2) / baryon_mass_density)
 logh[logh < 0]    = 1

@@ -138,11 +138,11 @@ HydroBase::initial_hydro         = "hydro_rnsid"
 HydroBase::initial_temperature   = "zero"
 HydroBase::initial_Y_e           = "one"
 
-Hydro_RNSID::rho_central   = 0.0012084 #0.0161887
+Hydro_RNSID::rho_central   = 0.0012084  #0.0161887
 Hydro_RNSID::axes_ratio    = 1.0        # radial/equatorial axes ratio  
 Hydro_RNSID::rotation_type = "uniform"  # uniform = uniform rotation  
 #Hydro_rnsid::A_diff       = 1          # Parameter of the diff rot-law.
-Hydro_RNSID::accuracy      = 1.e-10      # accuracy goal for convergence
+Hydro_RNSID::accuracy      = 1.e-10     # accuracy goal for convergence
 Hydro_RNSID::eos_type      = "tab"
 Hydro_RNSID::eos_file      = "/home/lorenzo/phd/NS_HOT_EOS/RNSID_Tables/LS220_234r_136t_50y_analmu_20091212_SVNr26.rnsidtable"   
 Hydro_RNSID::RNS_rho_min   = 1.e-10
@@ -150,8 +150,8 @@ Hydro_RNSID::RNS_rho_min   = 1.e-10
 ########
 
 HydroBase::evolution_method      = "GRHydro"
-HydroBase::temperature_evolution_method = "GRHydro"
-HydroBase::Y_e_evolution_method         = "GRHydro"
+#HydroBase::temperature_evolution_method = "GRHydro"
+#HydroBase::Y_e_evolution_method         = "GRHydro"
 
 
 GRHydro::GRHydro_eos_hot_eps_fix   = "yes"
