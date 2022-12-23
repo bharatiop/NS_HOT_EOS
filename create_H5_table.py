@@ -25,13 +25,35 @@ index_T    = data['eos.thermo'][:, 0].astype(int) - 1
 index_nb   = data['eos.thermo'][:, 1].astype(int) - 1
 index_ye   = data['eos.thermo'][:, 2].astype(int) - 1
 
-rho        = data['eos.nb'] * m_n     # LOGARITMICO     MeV / fm^3
+rho        = data['eos.nb'] * m_n     # LOGARITHMIC     MeV / fm^3
 pointsrho  = len(rho)
 
-y_e        = data['eos.yq']           # LINEARE         Adimensionale
+y_e        = data['eos.yq']           # LINEAR         Adimensional
 pointsye   = len(y_e)
 
-temp       = data['eos.t']            # LOGARITMICO     MeV
+temp       = data['eos.t']            # LOGARITHMIC     MeV
 pointstemp = len(temp)
 
 maps = lambda i,j,k : i + pointsrho * pointsye * j + pointsye * k
+
+# Find quantities and reshape them to match the H5 files in stellarcollapse.org
+pressure = data['eos.thermo'][:, 3] * data['eos.nb'][index_nb]   # MeV / fm^3
+pressure = pressure[maps(np.arange(pointsye)[:, None, None], np.arange(pointstemp)[None, :, None], np.arange(pointsrho)[None, None, :])]
+
+entropy  = data['eos.thermo'][:, 4] * data['eos.nb'][index_nb]   # Adimensional
+entropy  = entropy[maps(np.arange(pointsye)[:, None, None], np.arange(pointstemp)[None, :, None], np.arange(pointsrho)[None, None, :])]
+
+energy   = data['eos.thermo'][:, 9]
+energy   = energy[maps(np.arange(pointsye)[:, None, None], np.arange(pointstemp)[None, :, None], np.arange(pointsrho)[None, None, :])]
+
+ds = {  'rho'     : rho     , 'pointsrho':pointsrho, 
+        'y_e'     : y_e     , 'pointsye':pointsye, 
+        'temp'    : temp    , 'pointstemp':pointstemp, 
+        'pressure': pressure, 
+        'entropy' : entropy , 
+        'energy'  : energy
+    }
+
+with h5py.File(PATH + "TEST_FOP(SFHoY).h5", "w") as f:
+    for d in ds:
+        dset = f.create_dataset(d, data=ds[d], dtype='f')
