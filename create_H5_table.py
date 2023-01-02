@@ -1,6 +1,9 @@
 import os
 import h5py
+
 import numpy as np
+from scipy.interpolate import CubicSpline 
+
 from itertools import chain
 
 def read_table_varying_columns(FILE_PATH):
@@ -50,6 +53,19 @@ def reshape_array(original_matrix, pointsrho, pointstemp, pointsyq):
     # Returns the values from the original matrix at the calculated indices
     return np.take(original_matrix, indices)
 
+def spline_derivative(y, x, nu=1):
+  """
+  Computes the 'nu'-th order derivative of the input array 'y' with respect to 'x'.
+  
+  Parameters:
+  y (1D array): The input array.
+  x (1D array): The independent variable. Must be a strictly increasing sequence.
+  nu (int): The order of the derivative. Default is 1 (first-order derivative).
+  
+  Returns:
+  1D array: The 'nu'-th order derivative of 'y' with respect to 'x' computed at 'x'.
+  """
+  return CubicSpline(x, y).derivative(nu = nu)(x)
 
 PATH = '/home/lorenzo/phd/NS_HOT_EOS/EOS/compOSE/FOP(SFHoY)'
 h5_name = 'TEST_' + PATH.split('/')[-1] + '.h5'
@@ -154,9 +170,27 @@ entropy  = data['eos.thermo'][:, 4] * data['eos.nb'][index_nb]   # Adimensional
 entropy = reshape_array(entropy, pointsrho, pointstemp, pointsyq)
 
 print('\t* Entropy')
+
 #### CS2 and GAMMA #############
+# Compute and reshape the energy e = rho * (1 + eps)
+e = m_n * data['eos.nb'][index_nb] * ( 1 + data['eos.thermo'][:, 9] )
+e = reshape_array(e, pointsrho, pointstemp, pointsyq)
 
+# Compute the square of the speed of sound from
+# cs2 = dp/de = dp/dn_b * dn_b/de + dp/dT * dT/de + dp/dy_q * dy_q/de
+dpdnb = np.apply_along_axis(spline_derivative, 2, pressure, data['eos.nb'])
+dednb = np.apply_along_axis(spline_derivative, 2, e       , data['eos.nb'])
+dpdt  = np.apply_along_axis(spline_derivative, 1, pressure, data['eos.t'] )
+dedt  = np.apply_along_axis(spline_derivative, 1, e       , data['eos.t'] )
+dpdy  = np.apply_along_axis(spline_derivative, 0, pressure, data['eos.yq'])
+dedy  = np.apply_along_axis(spline_derivative, 0, e       , data['eos.yq'])
 
+cs2 = dpdnb/dednb + dpdt/dedt + dpdy/dedy
+print('\t* Squared speed of sound')
+
+# The adiabatic index is gamma = dln(p)/dln(e) = e * cs2 / p
+gamma = e * cs2 / pressure
+print('\t* Adiabatic index')
 ################################
 
 #### MASS FRACTIONS ############
@@ -182,6 +216,7 @@ if 'eos.compo' in files:
         for j in conc_iter:
             # Get the particle
             particle = int(row[j])
+            lbl = f'X{particle_index[particle]}'
             # If j is within the range of the pairs, get its mass fraction
             if j < 5 + n_pairs * 2:
                 mass_fraction = row[j+1] * baryonic_number[particle]
@@ -193,10 +228,10 @@ if 'eos.compo' in files:
             # If the particle is not already in the dictionary, create a new entry
             # with a default value of NaN for all indices and add the value
             try:
-                mass_fractions[f'X{particle_index[particle]}'][i] = mass_fraction
+                mass_fractions[lbl][i] = mass_fraction
             except KeyError:
-                mass_fractions[f'X{particle_index[particle]}'] = np.full(len(data['eos.compo']), np.NaN)
-                mass_fractions[f'X{particle_index[particle]}'][i] = mass_fraction
+                mass_fractions[lbl] = np.full(len(data['eos.compo']), np.NaN)
+                mass_fractions[lbl][i] = mass_fraction
 
     # Reshape arrays
     for key in mass_fractions.keys():
@@ -205,7 +240,7 @@ if 'eos.compo' in files:
     print('\t* Mass fractions')
     ################################
     #### CHEMICAL POTENTIALS #######
-    
+    mus = {}
     
     
     
@@ -219,11 +254,16 @@ ds = {
         'logtemp'  : logtemp  , 'pointstemp'  : pointstemp, 
         'logpress' : logpress , 
         'entropy'  : entropy  , 
-        'logenergy': logenergy, 'energy_shift': energy_shift
+        'logenergy': logenergy, 'energy_shift': energy_shift,
+        'cs2'      : cs2      , 'gamma'       : gamma
     }
 
-for key in mass_fractions.keys():
-    ds[key] = mass_fractions[key]
+if 'eos.compo' in files:
+    for key in mass_fractions.keys():
+       ds[key] = mass_fractions[key]
+
+    for key in mus.keys():
+        ds[key] = mus[key]
 
 with h5py.File(OUTPUT, "w") as f:
     for d in ds:
