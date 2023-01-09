@@ -240,10 +240,24 @@ if 'eos.compo' in files:
     print('\t* Mass fractions')
     ################################
     #### CHEMICAL POTENTIALS #######
+    free_energy = data['eos.thermo'][:, 9]
+    free_energy = reshape_array(free_energy, pointsrho, pointstemp, pointsyq)
+    
     mus = {}
     
-    
-    
+    for key in particle_index.keys():
+        if key == 999:
+            continue
+        
+        mu_lbl = f'mu_{particle_index[key]}'
+        X_lbl  = f'X{particle_index[key]}'
+        mus[mu_lbl] = reshape_array(np.full(len(data['eos.compo']), np.NaN), pointsrho, pointstemp, pointsyq)
+        
+        for i in range(pointstemp):
+            for j in range(pointsrho):
+                for k in range(pointsyq-1):
+                    mus[mu_lbl][k, i, j] = baryonic_number[key] * ( free_energy[k+1, i, j] - free_energy[k, i, j] ) / (mass_fractions[X_lbl][k+1, i, j] - mass_fractions[X_lbl][k, i, j] ) / data['eos.nb'][j]
+        
     print('\t* Chemical potentials')
     ################################
 
