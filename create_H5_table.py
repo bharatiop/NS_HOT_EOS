@@ -54,18 +54,18 @@ def reshape_array(original_matrix, pointsrho, pointstemp, pointsyq):
     return np.take(original_matrix, indices)
 
 def spline_derivative(y, x, nu=1):
-  """
-  Computes the 'nu'-th order derivative of the input array 'y' with respect to 'x'.
-  
-  Parameters:
-  y (1D array): The input array.
-  x (1D array): The independent variable. Must be a strictly increasing sequence.
-  nu (int): The order of the derivative. Default is 1 (first-order derivative).
-  
-  Returns:
-  1D array: The 'nu'-th order derivative of 'y' with respect to 'x' computed at 'x'.
-  """
-  return CubicSpline(x, y).derivative(nu = nu)(x)
+    """
+    Computes the 'nu'-th order derivative of the input array 'y' with respect to 'x'.
+
+    Parameters:
+    y (1D array): The input array.
+    x (1D array): The independent variable. Must be a strictly increasing sequence.
+    nu (int): The order of the derivative. Default is 1 (first-order derivative).
+
+    Returns:
+    1D array: The 'nu'-th order derivative of 'y' with respect to 'x' computed at 'x'.
+    """
+    return CubicSpline(x, y).derivative(nu = nu)(x)
 
 PATH = '/home/lorenzo/phd/NS_HOT_EOS/EOS/compOSE/FOP(SFHoY)'
 h5_name = 'TEST_' + PATH.split('/')[-1] + '.h5'
@@ -190,10 +190,11 @@ print('\t* Squared speed of sound')
 
 # The adiabatic index is gamma = dln(p)/dln(e) = e * cs2 / p
 gamma = e * cs2 / pressure
+
 print('\t* Adiabatic index')
 ################################
 
-#### MASS FRACTIONS ############
+
 if 'eos.compo' in files:
     # Thede dictionaries might need to be generalized
     particle_index = {  0    : 'e',    10   : 'n',     11   : 'p',
@@ -204,6 +205,8 @@ if 'eos.compo' in files:
     baryonic_number = { 0    : 0, 10   : 1, 11   : 1,
                         100  : 1, 110  : 1, 111  : 1, 112  : 1, 120 : 1, 121 : 1,
                         4002 : 4, 3002 : 3, 3001 : 3, 2001 : 2,}
+
+    #### MASS FRACTIONS ############
 
     mass_fractions = {}
     for i, row in enumerate(data['eos.compo']):
@@ -238,8 +241,10 @@ if 'eos.compo' in files:
         mass_fractions[key] = reshape_array(mass_fractions[key], pointsrho, pointstemp, pointsyq)
 
     print('\t* Mass fractions')
+    
     ################################
     #### CHEMICAL POTENTIALS #######
+    
     free_energy = data['eos.thermo'][:, 9]
     free_energy = reshape_array(free_energy, pointsrho, pointstemp, pointsyq)
     
