@@ -74,7 +74,7 @@ def dir_path(string):
     if os.path.isdir(string):
         return string
     else:
-        raise NotADirectoryError(errno.ENOENT, os.strerror(errno.ENOENT), string)
+        raise NotADirectoryError(errno.ENOTDIR, os.strerror(errno.ENOTDIR), string)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--folder', help = "Path to the EOS files. It must be a folder with files downloaded from https://compose.obspm.fr/", type = dir_path, required = True)
