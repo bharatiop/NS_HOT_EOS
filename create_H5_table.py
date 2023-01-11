@@ -85,7 +85,6 @@ def dir_path(string):
     if os.path.isdir(string):
         return string
     else:
-
         raise NotADirectoryError(errno.ENOTDIR, os.strerror(errno.ENOTDIR), string)
 
 # Create an ArgumentParser object
@@ -93,7 +92,9 @@ parser = argparse.ArgumentParser()
 
 # Define the 'folder' argument
 parser.add_argument('-f', '--folder', 
-    help = "Path to the EOS files. It must be a folder with files downloaded from https://compose.obspm.fr/", 
+    help = "Path to the EOS files. It must be a folder containing files from the CompOSE website.\
+            Note that if the path contains spaces or special characters the path must be provided with the following syntax: \
+            -f/--folder='special/path/to/folder/'.", 
     type = dir_path, # use the dir_path function as a type checker
     required = True)
 
@@ -122,7 +123,7 @@ elif args.name[-3:] != '.h5':
 OUTPUT = os.path.join(args.folder, args.name)
 
 # Files used to create the H5 file. 
-files = [file for file in os.listdir(PATH) if 'eos.' in file and not '.pdf' in file and not '.init' in file]
+files = [file for file in os.listdir(args.folder) if 'eos.' in file and not '.pdf' in file and not '.init' in file]
 # Check if all the mandatory files are present
 mandatory_files = ['eos.nb', 'eos.t', 'eos.yq', 'eos.thermo']
 missing_files = [file for file in mandatory_files if file not in files]
