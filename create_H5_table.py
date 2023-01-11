@@ -70,25 +70,55 @@ def spline_derivative(y, x, nu=1):
     """
     return CubicSpline(x, y).derivative(nu = nu)(x)
 
+
 def dir_path(string):
+    """
+    This function checks if the file path passed as an argument is a valid directory.
+    If the file path is not a valid directory, it raises a NotADirectoryError with additional information such as the error number, error message and the string passed as an argument.
+
+    Parameters:
+    string: path of file to check
+    
+    Returns:
+    return the path if it is valid directory else raise NotADirectoryError
+    """
     if os.path.isdir(string):
         return string
     else:
+
         raise NotADirectoryError(errno.ENOTDIR, os.strerror(errno.ENOTDIR), string)
 
+# Create an ArgumentParser object
 parser = argparse.ArgumentParser()
-parser.add_argument('-f', '--folder', help = "Path to the EOS files. It must be a folder with files downloaded from https://compose.obspm.fr/", type = dir_path, required = True)
-parser.add_argument('-N', '--name', help = "Name of the h5 table that is saved. By deafult it is equal to the name of the given folder.", type = str)
+
+# Define the 'folder' argument
+parser.add_argument('-f', '--folder', 
+    help = "Path to the EOS files. It must be a folder with files downloaded from https://compose.obspm.fr/", 
+    type = dir_path, # use the dir_path function as a type checker
+    required = True)
+
+# Define the 'name' argument
+parser.add_argument('-N', '--name', 
+    help = "Name of the h5 table that is saved. By deafult it is equal to the name of the given folder.", 
+    type = str)
+
+# Parse the command-line arguments
 args = parser.parse_args()
 
+# If the folder path ends with a '/', remove it
 if args.folder[-1] == '/':
     args.folder = args.folder[:-1]
 
+# If the 'name' argument is not provided 
 if args.name == None:
+    # set the name to the name of the folder
     args.name = args.folder.split('/')[-1] + '.h5'
+# or if it does not have the '.h5' extension
 elif args.name[-3:] != '.h5':
+    # and append '.h5'
     args.name += '.h5'
 
+# Define the OUTPUT constant
 OUTPUT = os.path.join(args.folder, args.name)
 
 # Files used to create the H5 file. 
