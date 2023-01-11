@@ -1,6 +1,9 @@
 import os
 import h5py
 
+import argparse
+import errno
+
 import numpy as np
 from scipy.interpolate import CubicSpline 
 
@@ -67,9 +70,26 @@ def spline_derivative(y, x, nu=1):
     """
     return CubicSpline(x, y).derivative(nu = nu)(x)
 
-PATH = '/home/lorenzo/phd/NS_HOT_EOS/EOS/compOSE/FOP(SFHoY)'
-h5_name = 'TEST_' + PATH.split('/')[-1] + '.h5'
-OUTPUT = os.path.join(PATH, h5_name)
+def dir_path(string):
+    if os.path.isdir(string):
+        return string
+    else:
+        raise NotADirectoryError(errno.ENOENT, os.strerror(errno.ENOENT), string)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--folder', help = "Path to the EOS files. It must be a folder with files downloaded from https://compose.obspm.fr/", type = dir_path, required = True)
+parser.add_argument('-N', '--name', help = "Name of the h5 table that is saved. By deafult it is equal to the name of the given folder.", type = str)
+args = parser.parse_args()
+
+if args.folder[-1] == '/':
+    args.folder = args.folder[:-1]
+
+if args.name == None:
+    args.name = args.folder.split('/')[-1] + '.h5'
+elif args.name[-3:] != '.h5':
+    args.name += '.h5'
+
+OUTPUT = os.path.join(args.folder, args.name)
 
 # Files used to create the H5 file. 
 files = [file for file in os.listdir(PATH) if 'eos.' in file and not '.pdf' in file and not '.init' in file]
