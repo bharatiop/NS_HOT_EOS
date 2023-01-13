@@ -296,7 +296,7 @@ if 'eos.compo' in files:
     ################################
     #### CHEMICAL POTENTIALS #######
     
-    free_energy = data['eos.thermo'][:, 9]
+    free_energy = (1 + data['eos.thermo'][:, 9]) * m_n * data['eos.nb'][index_nb]
     free_energy = reshape_array(free_energy, pointsrho, pointstemp, pointsyq)
     
     mus = {}
