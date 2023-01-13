@@ -150,7 +150,7 @@ for file in files:
     print(f'Reading the file {file}...', end='\r')
 
     # Construct the file path
-    FILE_PATH = os.path.join(PATH, file)
+    FILE_PATH = os.path.join(args.folder, file)
     
     # Try to read the file as a table with a fixed number of columns
     # If this fails, handle the exception and try reading the file as a table with a variable number of columns
@@ -337,7 +337,7 @@ if 'eos.compo' in files:
 
 with h5py.File(OUTPUT, "w") as f:
     for d in ds:
-        dset = f.create_dataset(d, data=ds[d], dtype=np.float64)
+        dset = f.create_dataset(d, data=np.nan_to_num(ds[d]), dtype=np.float64)
 
 print(f'\nHDF5 file is')
 print(f'{OUTPUT}')
