@@ -33,7 +33,7 @@ parser.add_argument('-f', '--file',
     help = "Path to the H5 EOS file.\
             Note that if the path contains spaces or special characters the path must be provided with the following syntax: \
             -f/--folder='special/path/to/folder/'.", 
-    type = file_path, # use the dir_path function as a type checker
+    type = file_path, # use the file_path function as a type checker
     required = True)
 
 # Define the 'nrows' argument
@@ -45,15 +45,18 @@ parser.add_argument('-n', '--nrows',
 # Parse the command-line arguments
 args = parser.parse_args()
 
+# Determine the name of the output file
 name = os.path.split(args.file)[1]
 name = os.path.splitext(name)[0]
 
-
+# Read the densities
 with h5py.File(args.file, "r") as f:
     logrho = f['logrho'][()]
 
+# Interpolate the table
 EOS.ReadOttTable(args.file, nrows=args.nrows, rhomin=10**logrho[0], rhomax=10**logrho[-1], out_format="lorene")
 
+# Read and plot the file
 data = np.loadtxt(name+'_lorene.d', skiprows=9)
 
 fig = plt.figure()
